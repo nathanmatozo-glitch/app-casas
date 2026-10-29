@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 10),
               TextFormField(controller: city, decoration: const InputDecoration(labelText: 'Cidade / bairro'), validator: (v) => v == null || v.trim().isEmpty ? 'Informe a localização' : null),
               const SizedBox(height: 10),
-              DropdownButtonFormField<String>(value: kind, decoration: const InputDecoration(labelText: 'Tipo'), items: const [
+              DropdownButtonFormField<String>(initialValue: kind, decoration: const InputDecoration(labelText: 'Tipo'), items: const [
                 DropdownMenuItem(value: 'Venda', child: Text('Venda')),
                 DropdownMenuItem(value: 'Aluguel', child: Text('Aluguel')),
               ], onChanged: (v) => setDialog(() => kind = v ?? 'Venda')),
@@ -117,7 +117,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     final uri = Uri.parse('https://wa.me/$phone?text=${Uri.encodeComponent('Olá! Tenho interesse no imóvel: ${p.title}.')}');
-    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (await canLaunchUrl(uri)) { await launchUrl(uri, mode: LaunchMode.externalApplication); }
   }
 
   @override
