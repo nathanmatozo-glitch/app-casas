@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                 DropdownMenuItem(value: 'Aluguel', child: Text('Aluguel')),
               ], onChanged: (v) => setDialog(() => kind = v ?? 'Venda')),
               const SizedBox(height: 10),
-              TextFormField(controller: price, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Preço (R$)'), validator: (v) => double.tryParse((v ?? '').replaceAll(',', '.')) == null ? 'Informe um preço válido' : null),
+              TextFormField(controller: price, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Preço (R\$)'), validator: (v) => double.tryParse((v ?? '').replaceAll(',', '.')) == null ? 'Informe um preço válido' : null),
               const SizedBox(height: 10),
               TextFormField(controller: rooms, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Quartos')),
               const SizedBox(height: 10),
