@@ -3,6 +3,8 @@ name: Build Android APK
 on:
   push:
     branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
@@ -10,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Test and compile APK
+    name: Test and build Android and web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -21,7 +23,29 @@ jobs:
           channel: stable
           cache: true
       - name: Generate Android platform
-        run: flutter create --platforms=android --org br.com.appcasas --project-name app_casas .
+        run: flutter create --platforms=android,web --org br.com.appcasas --project-name app_casas .
+      - name: Add Android location permissions
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          manifest = Path('android/app/src/main/AndroidManifest.xml')
+          text = manifest.read_text()
+          permissions = '''
+              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />'''
+          if 'android.permission.ACCESS_FINE_LOCATION' not in text:
+              text = re.sub(r'(<manifest\b[^>]*>)', r'\1' + permissions, text, count=1)
+              manifest.write_text(text)
+          PY
+      - name: Set Android minimum SDK for image selection
+        run: |
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 24/' android/app/build.gradle.kts
+          else
+            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 24/' android/app/build.gradle
+          fi
       - name: Get dependencies
         run: flutter pub get
       - name: Format Dart
@@ -37,11 +61,30 @@ jobs:
             --dart-define=FIREBASE_APP_ID="${{ secrets.FIREBASE_APP_ID }}" \
             --dart-define=FIREBASE_MESSAGING_SENDER_ID="${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" \
             --dart-define=FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
-            --dart-define=GOOGLE_SERVER_CLIENT_ID="${{ secrets.GOOGLE_SERVER_CLIENT_ID }}"
+            --dart-define=GOOGLE_SERVER_CLIENT_ID="${{ secrets.GOOGLE_SERVER_CLIENT_ID }}" \
+            --dart-define=FIREBASE_AUTH_DOMAIN="${{ secrets.FIREBASE_AUTH_DOMAIN }}" \
+            --dart-define=FIREBASE_STORAGE_BUCKET="${{ secrets.FIREBASE_STORAGE_BUCKET }}"
+      - name: Build responsive web app
+        run: |
+          flutter build web --release \
+            --dart-define=FIREBASE_API_KEY="${{ secrets.FIREBASE_API_KEY }}" \
+            --dart-define=FIREBASE_APP_ID="${{ secrets.FIREBASE_APP_ID }}" \
+            --dart-define=FIREBASE_MESSAGING_SENDER_ID="${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" \
+            --dart-define=FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
+            --dart-define=GOOGLE_SERVER_CLIENT_ID="${{ secrets.GOOGLE_SERVER_CLIENT_ID }}" \
+            --dart-define=FIREBASE_AUTH_DOMAIN="${{ secrets.FIREBASE_AUTH_DOMAIN }}" \
+            --dart-define=FIREBASE_STORAGE_BUCKET="${{ secrets.FIREBASE_STORAGE_BUCKET }}"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-casas-mvp-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload web app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-casas-web
+          path: build/web
           if-no-files-found: error
           retention-days: 30
