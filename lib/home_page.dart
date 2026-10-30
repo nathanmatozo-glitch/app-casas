@@ -9,6 +9,7 @@ import 'owner_dashboard_page.dart';
 import 'property_card.dart';
 import 'property_detail_page.dart';
 import 'services/auth_service.dart';
+import 'services/listing_filters.dart';
 import 'services/listing_repository.dart';
 
 class HomePage extends StatefulWidget {
@@ -220,19 +221,7 @@ class _HomePageState extends State<HomePage> {
     final min = _moneyValue(minPriceController);
     final max = _moneyValue(maxPriceController);
     final filtered = all.where((property) {
-      final searchable = [
-        property.title,
-        property.neighborhood,
-        property.city,
-        property.state,
-        property.category.label,
-        property.postalCodePrefix,
-      ].join(' ').toLowerCase();
-      final queryDigits = query.replaceAll(RegExp(r'\D'), '');
-      final matchesLocation = searchable.contains(query) ||
-          (queryDigits.length >= 5 &&
-              property.postalCodePrefix.startsWith(queryDigits.substring(0, 5)));
-      if (query.isNotEmpty && !matchesLocation) return false;
+      if (!matchesListingSearch(property, query)) return false;
       if (dealFilter != null && property.dealType != dealFilter) return false;
       if (categoryFilter != null && property.category != categoryFilter) {
         return false;
@@ -244,16 +233,14 @@ class _HomePageState extends State<HomePage> {
       if (min != null && property.price < min) return false;
       if (max != null && property.price > max) return false;
       if (savedOnly && !favorites.contains(property.id)) return false;
-      if (currentPosition != null &&
-          property.latitude != null &&
-          property.longitude != null) {
-        final distance = Geolocator.distanceBetween(
-          currentPosition!.latitude,
-          currentPosition!.longitude,
-          property.latitude!,
-          property.longitude!,
-        );
-        if (distance > 30000) return false;
+      final position = currentPosition;
+      if (position != null &&
+          !listingIsWithinRadius(
+            property,
+            latitude: position.latitude,
+            longitude: position.longitude,
+          )) {
+        return false;
       }
       return true;
     }).toList();
@@ -768,7 +755,7 @@ class _SearchPanel extends StatelessWidget {
                   onChanged: (_) => onSearchChanged(),
                   decoration: const InputDecoration(
                     labelText: 'Onde você quer morar?',
-                    hintText: 'Bairro, cidade ou CEP',
+                    hintText: 'Endereço, bairro, cidade ou CEP',
                     prefixIcon: Icon(Icons.search),
                   ),
                 );
@@ -1014,4 +1001,3 @@ class _Footer extends StatelessWidget {
         ),
       );
 }
-
