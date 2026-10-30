@@ -1,7 +1,9 @@
 import 'package:app_casas/models/property_listing.dart';
+import 'package:app_casas/services/listing_filters.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 PropertyListing _listing({
+  bool whatsappAvailable = false,
   bool fullAddressPublished = false,
   String publicAddress = '',
 }) =>
@@ -19,6 +21,7 @@ PropertyListing _listing({
       status: ListingStatus.active,
       photos: const [],
       phonePublished: true,
+      whatsappAvailable: whatsappAvailable,
       fullAddressPublished: fullAddressPublished,
       publicAddress: publicAddress,
     );
@@ -29,6 +32,7 @@ void main() {
       final public = _listing().toPublicMap(ownerUid: 'owner-1');
 
       expect(public['phonePublished'], isTrue);
+      expect(public['whatsappAvailable'], isFalse);
       expect(public.containsKey('phone'), isFalse);
       expect(public.containsKey('publicAddress'), isFalse);
     });
@@ -57,6 +61,24 @@ void main() {
       expect(private.containsKey('phone'), isFalse);
       expect(contact['phone'], '(65) 99999-9999');
     });
+
+    test('WhatsApp só fica disponível quando o anunciante habilita a opção', () {
+      final public = _listing(whatsappAvailable: true)
+          .toPublicMap(ownerUid: 'owner-1');
+
+      expect(public['phonePublished'], isTrue);
+      expect(public['whatsappAvailable'], isTrue);
+      expect(public.containsKey('phone'), isFalse);
+    });
+
+    test('anúncios antigos preservam o botão de WhatsApp', () {
+      final legacy = PropertyListing.fromMap('old-listing', {
+        'phonePublished': true,
+      });
+
+      expect(legacy.whatsappAvailable, isTrue);
+      expect(legacy.copyWith(price: 2000).whatsappAvailable, isTrue);
+    });
   });
 
   test('categorias e tipo de negociação têm rótulos em português', () {
@@ -64,5 +86,58 @@ void main() {
     expect(DealType.buy.label, 'Comprar');
     expect(PropertyCategory.studio.label, 'Kitnet/Studio');
     expect(PropertyCategory.gatedHouse.label, 'Casa em condomínio');
+  });
+
+  group('filtros de localização', () {
+    test('busca endereço completo somente quando ele foi divulgado', () {
+      final privateAddress = _listing(
+        publicAddress: 'Rua das Flores, 20',
+      );
+      final publicAddress = _listing(
+        fullAddressPublished: true,
+        publicAddress: 'Rua das Flores, 20',
+      );
+
+      expect(matchesListingSearch(privateAddress, 'Rua das Flores'), isFalse);
+      expect(matchesListingSearch(publicAddress, 'Rua das Flores'), isTrue);
+    });
+
+    test('busca por localização não inclui imóveis sem coordenadas ou distantes', () {
+      const latitude = -15.601;
+      const longitude = -56.097;
+      final nearby = _listing().copyWith(
+        latitude: -15.6,
+        longitude: -56.1,
+      );
+      final distant = _listing().copyWith(
+        latitude: -14.0,
+        longitude: -56.0,
+      );
+
+      expect(
+        listingIsWithinRadius(
+          _listing(),
+          latitude: latitude,
+          longitude: longitude,
+        ),
+        isFalse,
+      );
+      expect(
+        listingIsWithinRadius(
+          nearby,
+          latitude: latitude,
+          longitude: longitude,
+        ),
+        isTrue,
+      );
+      expect(
+        listingIsWithinRadius(
+          distant,
+          latitude: latitude,
+          longitude: longitude,
+        ),
+        isFalse,
+      );
+    });
   });
 }
