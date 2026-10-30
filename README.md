@@ -10,7 +10,7 @@ Aplicativo Flutter em português do Brasil para procurar, anunciar e gerenciar i
 - Página do imóvel com fotos, preço, localização, descrição e informações disponíveis.
 - Anúncio em quatro etapas, com seleção e reorganização de até dez fotos.
 - Opção para divulgar o endereço completo ou somente bairro e cidade.
-- Autorização explícita para mostrar o telefone. Telefone e endereço privado ficam em documentos separados dos dados públicos do anúncio.
+- Autorização explícita para mostrar o telefone e escolha separada para indicar se ele também recebe WhatsApp. Telefone e endereço privado ficam em documentos separados dos dados públicos do anúncio.
 - Conta Google para publicar, editar, pausar, reativar, marcar como alugado/vendido, remover, salvar e denunciar anúncios.
 - Link para abrir a região no OpenStreetMap. A posição opcional do anúncio é aproximada.
 - Estados de carregamento, erro e ausência de resultados.
@@ -79,6 +79,7 @@ O provedor Google do Firebase ainda está desabilitado. Antes de declarar o logi
 
 - Anúncios ficam em `properties/{id}`. Apenas anúncios ativos são listados publicamente.
 - CEP e endereço completo ficam em `propertyPrivate/{id}`. O telefone fica separado em `propertyContacts/{id}` e só pode ser lido por uma pessoa autenticada quando o anunciante marcou a autorização de divulgação.
+- As regras do Firestore limitam os campos aceitos nos documentos públicos, privados e de contato; endereços completos só podem ser publicados quando a opção de divulgação estiver marcada.
 - Para permitir busca por CEP sem revelar o endereço, o anúncio guarda apenas os cinco primeiros dígitos do CEP na parte pública.
 - Favoritos ficam em `users/{uid}/favorites/{id}` e cada pessoa acessa somente os próprios. O nome e telefone usados nos próximos anúncios também ficam no documento privado `users/{uid}` para evitar pedir os mesmos dados novamente.
 - Denúncias são gravadas em `reports`. A regra permite revisão por uma conta com a custom claim `admin`; ainda não há uma tela administrativa no aplicativo.
@@ -110,4 +111,3 @@ Sem os Secrets, a compilação ainda pode ser analisada, mas a aplicação conti
 ## Dependências Firebase e Flutter
 
 O projeto usa as APIs atuais de `firebase_core` 5.1.0, `firebase_auth` 7.0.1, `cloud_firestore` 7.1.0, `firebase_storage` 14.0.1 e `google_sign_in` 7.2.0, além de `image_picker`, `geolocator` e `url_launcher`. Consulte as páginas oficiais para [Firebase Core](https://pub.dev/packages/firebase_core), [Firebase Auth](https://pub.dev/packages/firebase_auth), [Cloud Firestore](https://pub.dev/packages/cloud_firestore), [Firebase Storage](https://pub.dev/packages/firebase_storage) e [Google Sign-In](https://pub.dev/packages/google_sign_in).
-
