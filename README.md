@@ -48,6 +48,33 @@ Sem configuração Firebase, o app abre em **Modo demonstração** com três an�
 
 O APK consegue carregar anúncios depois de configurar os quatro valores básicos do Firebase. Para publicar fotos, configure também Storage e `FIREBASE_STORAGE_BUCKET`. O login Android precisa de `GOOGLE_SERVER_CLIENT_ID`; o login web precisa de `FIREBASE_AUTH_DOMAIN`. Nenhuma credencial é incluída no repositório.
 
+## Assinatura Android do APK no GitHub Actions
+
+Para assinar o APK com o certificado cadastrado no Firebase, crie estes quatro Secrets em **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret | Valor |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | Conteúdo Base64 do arquivo JKS |
+| `ANDROID_KEYSTORE_PASSWORD` | Senha do keystore |
+| `ANDROID_KEY_ALIAS` | `app-casas` |
+| `ANDROID_KEY_PASSWORD` | Senha da chave desse alias |
+
+No PowerShell do computador onde está o arquivo `%USERPROFILE%\app-casas-release.jks`, copie o conteúdo Base64 para a área de transferência:
+
+```powershell
+$keystorePath = Join-Path $env:USERPROFILE 'app-casas-release.jks'
+if (-not (Test-Path -LiteralPath $keystorePath)) {
+    throw "Keystore não encontrado: $keystorePath"
+}
+[Convert]::ToBase64String([IO.File]::ReadAllBytes($keystorePath)) | Set-Clipboard
+```
+
+Cole o conteúdo da área de transferência somente no valor de `ANDROID_KEYSTORE_BASE64` no GitHub. Preencha as outras três Secrets diretamente no GitHub; não envie a JKS, o Base64 ou senhas pelo chat. Depois de salvar, limpe a área de transferência com `Set-Clipboard -Value ''`.
+
+O workflow decodifica o JKS somente no runner, valida o alias e não inclui o arquivo nos artefatos. Builds de pull request não recebem as Secrets de assinatura. Se as quatro Secrets não estiverem definidas, o APK usa a chave de depuração padrão e não terá o SHA registrado no Firebase; se apenas parte delas estiver definida, a compilação para com erro.
+
+O provedor Google do Firebase ainda está desabilitado. Antes de declarar o login funcional, abra **Firebase Console → Authentication → Sign-in method → Google**, habilite o provedor e selecione um e-mail de suporte.
+
 ## Dados e privacidade
 
 - Anúncios ficam em `properties/{id}`. Apenas anúncios ativos são listados publicamente.
