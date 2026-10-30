@@ -167,11 +167,16 @@ Future<void> _enterField(
   String label,
   String value,
 ) async {
-  final field = find.byWidgetPredicate(
+  final decorator = find.byWidgetPredicate(
     (widget) =>
-        widget is TextFormField && widget.decoration.labelText == label,
+        widget is InputDecorator && widget.decoration.labelText == label,
   );
-  expect(field, findsOneWidget, reason: 'Campo "$label" deve estar disponível.');
+  final field = find.ancestor(of: decorator, matching: find.byType(TextFormField));
+  expect(
+    decorator,
+    findsOneWidget,
+    reason: 'Campo "$label" deve estar disponível.',
+  );
   await tester.ensureVisible(field);
   await tester.enterText(field, value);
 }
