@@ -116,6 +116,7 @@ class PropertyListing {
     required this.status,
     required this.photos,
     required this.phonePublished,
+    this.whatsappAvailable = false,
     required this.fullAddressPublished,
     this.publicAddress = '',
     this.condoFee,
@@ -150,6 +151,7 @@ class PropertyListing {
   final ListingStatus status;
   final List<ListingPhoto> photos;
   final bool phonePublished;
+  final bool whatsappAvailable;
   final bool fullAddressPublished;
   final String publicAddress;
   final double? latitude;
@@ -193,6 +195,8 @@ class PropertyListing {
       ),
       photos: photos,
       phonePublished: data['phonePublished'] as bool? ?? false,
+      // Older listings showed WhatsApp whenever a public phone was available.
+      whatsappAvailable: data['whatsappAvailable'] as bool? ?? true,
       fullAddressPublished: data['fullAddressPublished'] as bool? ?? false,
       publicAddress: data['publicAddress'] as String? ?? '',
       latitude: (data['latitude'] as num?)?.toDouble(),
@@ -221,6 +225,7 @@ class PropertyListing {
         'status': status.name,
         'photos': photos.map((photo) => photo.toMap()).toList(),
         'phonePublished': phonePublished,
+        'whatsappAvailable': whatsappAvailable,
         'fullAddressPublished': fullAddressPublished,
         if (fullAddressPublished && publicAddress.trim().isNotEmpty)
           'publicAddress': publicAddress.trim(),
@@ -253,6 +258,7 @@ class PropertyListing {
     ListingStatus? status,
     List<ListingPhoto>? photos,
     bool? phonePublished,
+    bool? whatsappAvailable,
     bool? fullAddressPublished,
     String? publicAddress,
     double? latitude,
@@ -280,6 +286,7 @@ class PropertyListing {
         status: status ?? this.status,
         photos: photos ?? this.photos,
         phonePublished: phonePublished ?? this.phonePublished,
+        whatsappAvailable: whatsappAvailable ?? this.whatsappAvailable,
         fullAddressPublished:
             fullAddressPublished ?? this.fullAddressPublished,
         publicAddress: publicAddress ?? this.publicAddress,
