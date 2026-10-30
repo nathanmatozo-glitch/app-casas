@@ -21,7 +21,7 @@ jobs:
           channel: stable
           cache: true
       - name: Generate Android platform
-        run: flutter create --platforms=android --org br.com.appcasas .
+        run: flutter create --platforms=android --org br.com.appcasas --project-name app_casas .
       - name: Get dependencies
         run: flutter pub get
       - name: Format Dart
