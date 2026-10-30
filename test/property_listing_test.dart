@@ -1,6 +1,8 @@
 import 'package:app_casas/models/property_listing.dart';
 import 'package:app_casas/services/listing_filters.dart';
+import 'package:app_casas/services/listing_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 
 PropertyListing _listing({
   bool whatsappAvailable = false,
@@ -78,6 +80,52 @@ void main() {
 
       expect(legacy.whatsappAvailable, isTrue);
       expect(legacy.copyWith(price: 2000).whatsappAvailable, isTrue);
+    });
+  });
+
+  group('fotos opcionais', () {
+    test('anúncio sem fotos grava e recupera uma lista vazia', () {
+      final data = _listing().toPublicMap(ownerUid: 'owner-1');
+
+      expect(data['photos'], isEmpty);
+      expect(PropertyListing.fromMap('sem-fotos', data).photos, isEmpty);
+    });
+
+    test('preserva várias fotos ao salvar e recuperar', () {
+      const photos = [
+        ListingPhoto(url: 'https://example.test/1.jpg', storagePath: '1.jpg'),
+        ListingPhoto(url: 'https://example.test/2.jpg', storagePath: '2.jpg'),
+        ListingPhoto(url: 'https://example.test/3.jpg', storagePath: '3.jpg'),
+      ];
+      final data = _listing().copyWith(photos: photos).toPublicMap(
+            ownerUid: 'owner-1',
+          );
+      final restored = PropertyListing.fromMap('com-fotos', data);
+
+      expect(data['photos'], hasLength(3));
+      expect(restored.photos.map((photo) => photo.url), [
+        'https://example.test/1.jpg',
+        'https://example.test/2.jpg',
+        'https://example.test/3.jpg',
+      ]);
+    });
+
+    test('Storage só é necessário para arquivos novos', () {
+      expect(photoSelectionsRequireStorage(const []), isFalse);
+      expect(
+        photoSelectionsRequireStorage([
+          const ListingPhotoSelection.existing(
+            ListingPhoto(url: 'https://example.test/old.jpg', storagePath: ''),
+          ),
+        ]),
+        isFalse,
+      );
+      expect(
+        photoSelectionsRequireStorage([
+          ListingPhotoSelection.newFile(XFile('/tmp/foto.jpg')),
+        ]),
+        isTrue,
+      );
     });
   });
 

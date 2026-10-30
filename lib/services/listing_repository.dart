@@ -6,6 +6,11 @@ import '../data/demo_listings.dart';
 import '../firebase_options.dart';
 import '../models/property_listing.dart';
 
+bool photoSelectionsRequireStorage(List<ListingPhotoSelection> selections) =>
+    selections.any(
+      (selection) => selection.file != null && selection.photo == null,
+    );
+
 class ListingRepository {
   const ListingRepository({required this.firebaseReady});
 
@@ -105,13 +110,11 @@ class ListingRepository {
     if (!firebaseReady) {
       throw StateError('Conecte o Firebase para publicar e salvar anúncios.');
     }
-    if (DefaultFirebaseOptions.storageBucket.isEmpty) {
+    if (photoSelectionsRequireStorage(photoSelections) &&
+        DefaultFirebaseOptions.storageBucket.isEmpty) {
       throw StateError(
         'O armazenamento de fotos ainda não está configurado no Firebase.',
       );
-    }
-    if (photoSelections.isEmpty) {
-      throw StateError('Adicione pelo menos uma foto do imóvel.');
     }
 
     final document = draft.listing.id.isEmpty

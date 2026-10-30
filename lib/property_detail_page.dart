@@ -225,7 +225,7 @@ class _Gallery extends StatelessWidget {
                   ),
                 ),
               ),
-            if (listing.photos.isEmpty)
+            if (listing.isDemo && listing.photos.isEmpty)
               const Positioned(right: 12, bottom: 12, child: _DemoLabel()),
           ],
         ),

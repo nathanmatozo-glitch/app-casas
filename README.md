@@ -8,7 +8,7 @@ Aplicativo Flutter em português do Brasil para procurar, anunciar e gerenciar i
 - Localização do aparelho somente após a pessoa tocar em **Usar localização** e autorizar. A busca digitada continua disponível se a permissão for recusada.
 - Categorias: apartamento, kitnet/studio, casa e casa em condomínio.
 - Página do imóvel com fotos, preço, localização, descrição e informações disponíveis.
-- Anúncio em quatro etapas, com seleção e reorganização de até dez fotos.
+- Anúncio em quatro etapas; fotos opcionais durante a fase de testes, com seleção e reorganização de até dez imagens.
 - Opção para divulgar o endereço completo ou somente bairro e cidade.
 - Autorização explícita para mostrar o telefone e escolha separada para indicar se ele também recebe WhatsApp. Telefone e endereço privado ficam em documentos separados dos dados públicos do anúncio.
 - Conta Google para publicar, editar, pausar, reativar, marcar como alugado/vendido, remover, salvar e denunciar anúncios.
@@ -24,12 +24,12 @@ Sem configuração Firebase, o app abre em **Modo demonstração** com três an�
 1. Crie um projeto em [Firebase Console](https://console.firebase.google.com/).
 2. Adicione o app Android com o identificador `br.com.appcasas.app_casas`.
 3. Em Authentication, habilite o provedor **Google**. Cadastre as impressões digitais SHA-1 e SHA-256 do certificado Android que assinará o APK.
-4. Crie um banco Cloud Firestore e um bucket do Firebase Storage.
-5. Publique as regras deste repositório:
+4. Crie um banco Cloud Firestore. Firebase Storage não é necessário para publicar anúncios sem fotos; não o habilite para esse fluxo.
+5. Publique somente as regras do Firestore deste repositório:
 
    ```sh
    firebase use --add
-   firebase deploy --only firestore:rules,storage
+   firebase deploy --only firestore:rules
    ```
 
 6. No repositório, acesse **Settings → Secrets and variables → Actions** e crie:
@@ -46,7 +46,7 @@ Sem configuração Firebase, o app abre em **Modo demonstração** com três an�
 
    Não coloque senhas, chaves privadas ou tokens de usuário nesses campos. Os valores públicos de configuração do Firebase não substituem as regras de segurança.
 
-O APK consegue carregar anúncios depois de configurar os quatro valores básicos do Firebase. Para publicar fotos, configure também Storage e `FIREBASE_STORAGE_BUCKET`. O login Android precisa de `GOOGLE_SERVER_CLIENT_ID`; o login web precisa de `FIREBASE_AUTH_DOMAIN`. Nenhuma credencial é incluída no repositório.
+Anúncios sem fotos podem ser publicados sem ativar ou configurar Firebase Storage e sem mudar de plano. O cadastro só acessa Storage quando há arquivos de imagem novos para enviar. Para publicar fotos, o serviço e `FIREBASE_STORAGE_BUCKET` precisam estar configurados. O login Android precisa de `GOOGLE_SERVER_CLIENT_ID`; o login web precisa de `FIREBASE_AUTH_DOMAIN`. Nenhuma credencial é incluída no repositório.
 
 ## Assinatura Android do APK no GitHub Actions
 

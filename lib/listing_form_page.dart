@@ -12,12 +12,14 @@ class ListingFormPage extends StatefulWidget {
     required this.firebaseReady,
     required this.repository,
     this.listing,
+    this.photoPicker,
   });
 
   final String uid;
   final bool firebaseReady;
   final ListingRepository repository;
   final PropertyListing? listing;
+  final Future<List<XFile>> Function()? photoPicker;
 
   @override
   State<ListingFormPage> createState() => _ListingFormPageState();
@@ -185,10 +187,6 @@ class _ListingFormPageState extends State<ListingFormPage> {
     if (step == 2) return _detailsForm.currentState?.validate() ?? false;
     final contactValid = _contactForm.currentState?.validate() ?? false;
     if (!contactValid) return false;
-    if (photos.isEmpty) {
-      setState(() => errorMessage = 'Adicione pelo menos uma foto do imóvel.');
-      return false;
-    }
     return true;
   }
 
@@ -226,7 +224,9 @@ class _ListingFormPageState extends State<ListingFormPage> {
 
   Future<void> _pickPhotos() async {
     try {
-      final picked = await ImagePicker().pickMultiImage(imageQuality: 82);
+      final picked = widget.photoPicker == null
+          ? await ImagePicker().pickMultiImage(imageQuality: 82)
+          : await widget.photoPicker!();
       if (!mounted || picked.isEmpty) return;
       setState(() {
         for (final image in picked) {
@@ -339,7 +339,7 @@ class _ListingFormPageState extends State<ListingFormPage> {
   Future<void> _saveListing() async {
     if (!widget.firebaseReady) {
       setState(() => errorMessage =
-          'Conecte o Firebase para publicar anúncios e enviar fotos.');
+          'Conecte o Firebase para publicar anúncios.');
       return;
     }
     setState(() {
@@ -362,7 +362,9 @@ class _ListingFormPageState extends State<ListingFormPage> {
       setState(() {
         errorMessage = error is StateError
             ? error.message
-            : 'Não foi possível salvar o anúncio ou enviar as fotos. Tente novamente.';
+            : photos.isEmpty
+                ? 'Não foi possível salvar o anúncio. Tente novamente.'
+                : 'Não foi possível salvar o anúncio ou enviar as fotos. Tente novamente.';
       });
     } finally {
       if (mounted) setState(() => saving = false);
@@ -785,6 +787,11 @@ class _ListingFormPageState extends State<ListingFormPage> {
               const SizedBox(height: 4),
               const Text(
                 'Use fotos do imóvel e evite mostrar documentos, pessoas ou dados pessoais.',
+                style: TextStyle(fontSize: 12),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Adicionar fotos é recomendado para valorizar seu imóvel, mas você pode publicar o anúncio sem imagens durante esta fase de testes.',
                 style: TextStyle(fontSize: 12),
               ),
               const SizedBox(height: 10),
