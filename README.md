@@ -60,7 +60,7 @@ O APK consegue carregar anúncios depois de configurar os quatro valores básico
 
 ## Executar localmente
 
-Instale Flutter stable 3.27 ou mais recente e o Firebase CLI. Como as pastas de plataforma são geradas pelo workflow, crie as plataformas antes de executar:
+Instale Flutter stable 3.41 ou mais recente e o Firebase CLI. Como as pastas de plataforma são geradas pelo workflow, crie as plataformas antes de executar:
 
 ```sh
 flutter create --platforms=android,web --org br.com.appcasas --project-name app_casas .
@@ -83,3 +83,4 @@ Sem os Secrets, a compilação ainda pode ser analisada, mas a aplicação conti
 ## Dependências Firebase e Flutter
 
 O projeto usa as APIs atuais de `firebase_core` 5.1.0, `firebase_auth` 7.0.1, `cloud_firestore` 7.1.0, `firebase_storage` 14.0.1 e `google_sign_in` 7.2.0, além de `image_picker`, `geolocator` e `url_launcher`. Consulte as páginas oficiais para [Firebase Core](https://pub.dev/packages/firebase_core), [Firebase Auth](https://pub.dev/packages/firebase_auth), [Cloud Firestore](https://pub.dev/packages/cloud_firestore), [Firebase Storage](https://pub.dev/packages/firebase_storage) e [Google Sign-In](https://pub.dev/packages/google_sign_in).
+

@@ -78,7 +78,9 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
       if (!mounted) return;
       _message('Anúncio removido.');
     } catch (_) {
-      if (mounted) _message('Não foi possível remover o anúncio. Tente novamente.');
+      if (mounted) {
+        _message('Não foi possível remover o anúncio. Tente novamente.');
+      }
     }
   }
 
@@ -305,3 +307,4 @@ class _DashboardMessage extends StatelessWidget {
         ),
       );
 }
+

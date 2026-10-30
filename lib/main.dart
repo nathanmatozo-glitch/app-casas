@@ -89,10 +89,11 @@ class AppCasasApp extends StatelessWidget {
                   );
                 },
               )
-            : HomePage(
+            : const HomePage(
                 firebaseReady: false,
                 googleAuthReady: false,
                 user: null,
               ),
       );
 }
+

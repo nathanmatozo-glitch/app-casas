@@ -466,7 +466,7 @@ class _ReportDialogState extends State<_ReportDialog> {
             const Text('Conte o que parece errado ou suspeito.'),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: reason,
+              initialValue: reason,
               items: const [
                 DropdownMenuItem(
                     value: 'Informação incorreta',
@@ -493,3 +493,4 @@ class _ReportDialogState extends State<_ReportDialog> {
         ],
       );
 }
+

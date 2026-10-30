@@ -608,21 +608,32 @@ class _ListingFormPageState extends State<ListingFormPage> {
                         .titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold)),
               ),
-              RadioListTile<bool>(
-                contentPadding: EdgeInsets.zero,
-                value: false,
+              RadioGroup<bool>(
                 groupValue: showFullAddress,
-                onChanged: (value) => setState(() => showFullAddress = value!),
-                title: const Text('Mostrar apenas bairro e cidade'),
-                subtitle: const Text('Seu endereço completo fica privado.'),
-              ),
-              RadioListTile<bool>(
-                contentPadding: EdgeInsets.zero,
-                value: true,
-                groupValue: showFullAddress,
-                onChanged: (value) => setState(() => showFullAddress = value!),
-                title: const Text('Mostrar o endereço completo'),
-                subtitle: const Text('Rua, número e CEP aparecerão no anúncio.'),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => showFullAddress = value);
+                  }
+                },
+                child: Column(
+                  children: [
+                    RadioListTile<bool>(
+                      contentPadding: EdgeInsets.zero,
+                      value: false,
+                      title: const Text('Mostrar apenas bairro e cidade'),
+                      subtitle:
+                          const Text('Seu endereço completo fica privado.'),
+                    ),
+                    RadioListTile<bool>(
+                      contentPadding: EdgeInsets.zero,
+                      value: true,
+                      title: const Text('Mostrar o endereço completo'),
+                      subtitle: const Text(
+                        'Rua, número e CEP aparecerão no anúncio.',
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 6),
               OutlinedButton.icon(
@@ -785,9 +796,8 @@ class _ListingFormPageState extends State<ListingFormPage> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: photos.length,
-                  onReorder: (oldIndex, newIndex) {
+                  onReorderItem: (oldIndex, newIndex) {
                     setState(() {
-                      if (newIndex > oldIndex) newIndex--;
                       final item = photos.removeAt(oldIndex);
                       photos.insert(newIndex, item);
                     });
@@ -894,3 +904,4 @@ class _ErrorBox extends StatelessWidget {
         child: Text(text, style: const TextStyle(color: Color(0xFF9D321F))),
       );
 }
+

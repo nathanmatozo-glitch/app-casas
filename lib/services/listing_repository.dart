@@ -270,3 +270,4 @@ class ListingRepository {
         _ => 'image/jpeg',
       };
 }
+

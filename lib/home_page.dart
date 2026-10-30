@@ -808,7 +808,7 @@ class _SearchPanel extends StatelessWidget {
                       width: width,
                       child: DropdownButtonFormField<PropertyCategory?>(
                         isExpanded: true,
-                        value: categoryFilter,
+                        initialValue: categoryFilter,
                         decoration: const InputDecoration(labelText: 'Tipo de imóvel'),
                         items: [
                           const DropdownMenuItem(
@@ -828,7 +828,7 @@ class _SearchPanel extends StatelessWidget {
                       width: width,
                       child: DropdownButtonFormField<int?>(
                         isExpanded: true,
-                        value: bedroomFilter,
+                        initialValue: bedroomFilter,
                         decoration: const InputDecoration(labelText: 'Quartos'),
                         items: const [
                           DropdownMenuItem(value: null, child: Text('Qualquer quantidade')),
@@ -1014,3 +1014,4 @@ class _Footer extends StatelessWidget {
         ),
       );
 }
+
