@@ -2,12 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'login_page.dart';
-import 'main.dart';
 
 class AuthGate extends StatelessWidget {
-  const AuthGate({super.key, required this.firebaseReady});
+  const AuthGate({super.key, required this.firebaseReady, required this.authenticatedBuilder});
 
   final bool firebaseReady;
+  final Widget Function(BuildContext context, User user) authenticatedBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class AuthGate extends StatelessWidget {
         }
         final user = snapshot.data;
         if (user == null) return const LoginPage(firebaseReady: true);
-        return HomePage(user: user);
+        return authenticatedBuilder(context, user);
       },
     );
   }
