@@ -390,7 +390,7 @@ class _ListingFormPageState extends State<ListingFormPage> {
                   ? const Center(child: CircularProgressIndicator())
                   : Padding(
                       padding: const EdgeInsets.fromLTRB(18, 8, 18, 16),
-                      child: const Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Etapa ${step + 1} de 4',
@@ -615,20 +615,19 @@ class _ListingFormPageState extends State<ListingFormPage> {
                     setState(() => showFullAddress = value);
                   }
                 },
-                child: Column(
+                child: const Column(
                   children: [
                     RadioListTile<bool>(
                       contentPadding: EdgeInsets.zero,
                       value: false,
-                      title: const Text('Mostrar apenas bairro e cidade'),
-                      subtitle:
-                          const Text('Seu endereço completo fica privado.'),
+                      title: Text('Mostrar apenas bairro e cidade'),
+                      subtitle: Text('Seu endereço completo fica privado.'),
                     ),
                     RadioListTile<bool>(
                       contentPadding: EdgeInsets.zero,
                       value: true,
-                      title: const Text('Mostrar o endereço completo'),
-                      subtitle: const Text(
+                      title: Text('Mostrar o endereço completo'),
+                      subtitle: Text(
                         'Rua, número e CEP aparecerão no anúncio.',
                       ),
                     ),
