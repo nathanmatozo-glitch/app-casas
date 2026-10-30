@@ -1,14 +1,17 @@
 name: app_casas
-description: Aplicativo MVP para divulgar e gerenciar imóveis para venda e aluguel.
+description: Aplicativo Flutter para divulgação e gerenciamento de imóveis.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.6.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+  firebase_core: ^5.0.0
+  firebase_auth: ^7.0.1
+  google_sign_in: ^7.2.0
   shared_preferences: ^2.3.2
   url_launcher: ^6.3.1
 
