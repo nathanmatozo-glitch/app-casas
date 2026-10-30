@@ -52,6 +52,7 @@ class _ListingFormPageState extends State<ListingFormPage> {
   PropertyCategory category = PropertyCategory.apartment;
   bool showFullAddress = false;
   bool publishPhone = false;
+  bool whatsappAvailable = false;
   bool loadingPrivateDetails = false;
   bool locationBusy = false;
   bool saving = false;
@@ -84,6 +85,8 @@ class _ListingFormPageState extends State<ListingFormPage> {
       descriptionController.text = listing.description;
       showFullAddress = listing.fullAddressPublished;
       publishPhone = listing.phonePublished;
+      whatsappAvailable =
+          listing.phonePublished && listing.whatsappAvailable;
       latitude = listing.latitude;
       longitude = listing.longitude;
       photos = listing.photos
@@ -312,6 +315,7 @@ class _ListingFormPageState extends State<ListingFormPage> {
       status: old?.status ?? ListingStatus.active,
       photos: old?.photos ?? const [],
       phonePublished: publishPhone,
+      whatsappAvailable: publishPhone && whatsappAvailable,
       fullAddressPublished: showFullAddress,
       publicAddress: showFullAddress ? _fullAddress() : '',
       latitude: latitude,
@@ -871,7 +875,10 @@ class _ListingFormPageState extends State<ListingFormPage> {
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
                 value: publishPhone,
-                onChanged: (value) => setState(() => publishPhone = value ?? false),
+                onChanged: (value) => setState(() {
+                  publishPhone = value ?? false;
+                  if (!publishPhone) whatsappAvailable = false;
+                }),
                 title: const Text(
                   'Autorizo mostrar meu telefone para pessoas interessadas neste anúncio.',
                 ),
@@ -880,6 +887,19 @@ class _ListingFormPageState extends State<ListingFormPage> {
                 ),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
+              if (publishPhone)
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: whatsappAvailable,
+                  onChanged: (value) => setState(
+                    () => whatsappAvailable = value ?? false,
+                  ),
+                  title: const Text('Este telefone também tem WhatsApp.'),
+                  subtitle: const Text(
+                    'Marque para permitir que interessados iniciem uma conversa pelo WhatsApp.',
+                  ),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
               const SizedBox(height: 12),
             ],
           ),
@@ -903,4 +923,3 @@ class _ErrorBox extends StatelessWidget {
         child: Text(text, style: const TextStyle(color: Color(0xFF9D321F))),
       );
 }
-
