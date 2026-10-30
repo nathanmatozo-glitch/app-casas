@@ -47,6 +47,10 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
       _message('O anunciante escolheu não divulgar o telefone neste anúncio.');
       return;
     }
+    if (whatsapp && !listing.whatsappAvailable) {
+      _message('O anunciante não informou WhatsApp para este anúncio.');
+      return;
+    }
     if (_currentUser == null) await widget.onLoginRequired();
     if (_currentUser == null || !mounted) return;
 
@@ -391,14 +395,19 @@ class _ContactCard extends StatelessWidget {
                   text: 'O contato será liberado em anúncios reais.',
                 )
               else ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: onWhatsApp,
-                    icon: const Icon(Icons.chat_bubble_outline),
-                    label: const Text('Conversar no WhatsApp'),
+                if (listing.whatsappAvailable) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: onWhatsApp,
+                      icon: const Icon(Icons.chat_bubble_outline),
+                      label: const Text('Conversar no WhatsApp'),
+                    ),
                   ),
-                ),
+                ] else
+                  const _Notice(
+                    text: 'O anunciante não informou WhatsApp. Você pode ligar.',
+                  ),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
@@ -493,4 +502,3 @@ class _ReportDialogState extends State<_ReportDialog> {
         ],
       );
 }
-
