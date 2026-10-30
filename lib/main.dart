@@ -41,7 +41,10 @@ class AppCasasApp extends StatelessWidget {
             border: OutlineInputBorder(),
           ),
         ),
-        home: AuthGate(firebaseReady: firebaseReady),
+        home: AuthGate(
+          firebaseReady: firebaseReady,
+          authenticatedBuilder: (context, user) => HomePage(user: user),
+        ),
       );
 }
 
