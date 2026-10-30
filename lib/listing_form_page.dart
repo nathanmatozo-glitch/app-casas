@@ -390,7 +390,7 @@ class _ListingFormPageState extends State<ListingFormPage> {
                   ? const Center(child: CircularProgressIndicator())
                   : Padding(
                       padding: const EdgeInsets.fromLTRB(18, 8, 18, 16),
-                      child: Column(
+                      child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Etapa ${step + 1} de 4',
