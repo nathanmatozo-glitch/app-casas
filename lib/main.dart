@@ -1,10 +1,33 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void main() => runApp(const AppCasasApp());
+import 'auth_gate.dart';
+import 'firebase_options.dart';
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  var firebaseReady = false;
+  try {
+    if (DefaultFirebaseOptions.isConfigured) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+      await GoogleSignIn.instance.initialize(
+        serverClientId: DefaultFirebaseOptions.googleServerClientId,
+      );
+      firebaseReady = true;
+    }
+  } catch (error, stackTrace) {
+    debugPrint('Falha ao inicializar autenticação: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+  runApp(AppCasasApp(firebaseReady: firebaseReady));
+}
 
 class AppCasasApp extends StatelessWidget {
-  const AppCasasApp({super.key});
+  const AppCasasApp({super.key, required this.firebaseReady});
+
+  final bool firebaseReady;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -18,7 +41,7 @@ class AppCasasApp extends StatelessWidget {
             border: OutlineInputBorder(),
           ),
         ),
-        home: const HomePage(),
+        home: AuthGate(firebaseReady: firebaseReady),
       );
 }
 
@@ -32,7 +55,9 @@ class Property {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.user});
+
+  final User user;
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -56,6 +81,11 @@ class _HomePageState extends State<HomePage> {
   }).toList();
 
   String money(double value) => 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
+
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn.instance.signOut();
+  }
 
   Future<void> addProperty() async {
     final formKey = GlobalKey<FormState>();
@@ -127,7 +157,45 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: const Row(children: [Icon(Icons.home_work_rounded), SizedBox(width: 8), Text('App Casas')]),
-      actions: [IconButton(tooltip: 'Novo anúncio', onPressed: addProperty, icon: const Icon(Icons.add_home_work_rounded))],
+      actions: [
+        PopupMenuButton<String>(
+          tooltip: 'Conta',
+          onSelected: (value) {
+            if (value == 'logout') signOut();
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem<String>(
+              enabled: false,
+              child: Text(widget.user.email ?? 'Conta Google'),
+            ),
+            const PopupMenuItem<String>(
+              value: 'logout',
+              child: Row(children: [
+                Icon(Icons.logout, size: 19),
+                SizedBox(width: 8),
+                Text('Sair da conta'),
+              ]),
+            ),
+          ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: CircleAvatar(
+              radius: 17,
+              backgroundImage: widget.user.photoURL == null
+                  ? null
+                  : NetworkImage(widget.user.photoURL!),
+              child: widget.user.photoURL == null
+                  ? Text((widget.user.displayName ?? 'U').substring(0, 1).toUpperCase())
+                  : null,
+            ),
+          ),
+        ),
+        IconButton(
+          tooltip: 'Novo anúncio',
+          onPressed: addProperty,
+          icon: const Icon(Icons.add_home_work_rounded),
+        ),
+      ],
     ),
     body: SafeArea(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Container(
