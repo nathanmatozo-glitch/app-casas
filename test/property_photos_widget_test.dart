@@ -17,7 +17,7 @@ void main() {
             child: Row(children: [
               Expanded(
                 child: PropertyCard(
-                  listing: _listing(),
+                  listing: _listing(title: 'Imóvel sem foto'),
                   saved: false,
                   onTap: () {},
                   onFavorite: () {},
@@ -26,12 +26,15 @@ void main() {
               ),
               Expanded(
                 child: PropertyCard(
-                  listing: _listing(photos: const [
-                    ListingPhoto(
-                      url: 'https://example.test/imovel.jpg',
-                      storagePath: '',
-                    ),
-                  ]),
+                  listing: _listing(
+                    title: 'Imóvel com foto',
+                    photos: const [
+                      ListingPhoto(
+                        url: 'https://example.test/imovel.jpg',
+                        storagePath: '',
+                      ),
+                    ],
+                  ),
                   saved: false,
                   onTap: () {},
                   onFavorite: () {},
@@ -45,9 +48,31 @@ void main() {
     ));
     await tester.pump();
 
+    final noPhotoCard = find.ancestor(
+      of: find.text('Imóvel sem foto'),
+      matching: find.byType(PropertyCard),
+    );
+    final photoCard = find.ancestor(
+      of: find.text('Imóvel com foto'),
+      matching: find.byType(PropertyCard),
+    );
+
     expect(find.byType(PropertyCard), findsNWidgets(2));
-    expect(find.byIcon(Icons.home_work_rounded), findsOneWidget);
-    expect(find.byType(Image), findsOneWidget);
+    expect(
+      find.descendant(of: noPhotoCard, matching: find.byType(Image)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: noPhotoCard,
+        matching: find.byIcon(Icons.home_work_rounded),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: photoCard, matching: find.byType(Image)),
+      findsOneWidget,
+    );
   });
 
   testWidgets('detalhes de anúncio sem fotos usam espaço reservado neutro',
@@ -68,11 +93,14 @@ void main() {
   });
 }
 
-PropertyListing _listing({List<ListingPhoto> photos = const []}) =>
+PropertyListing _listing({
+  String title = 'Apartamento para teste',
+  List<ListingPhoto> photos = const [],
+}) =>
     PropertyListing(
       id: 'imovel-1',
       ownerUid: 'owner-1',
-      title: 'Apartamento para teste',
+      title: title,
       dealType: DealType.rent,
       category: PropertyCategory.apartment,
       neighborhood: 'Centro',
