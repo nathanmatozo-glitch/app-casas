@@ -13,26 +13,90 @@ service cloud.firestore {
       return signedIn() && request.auth.token.admin == true;
     }
 
+    function propertyFieldsAreAllowed(data) {
+      return data.keys().hasOnly([
+        'ownerUid', 'title', 'dealType', 'category', 'neighborhood', 'city',
+        'state', 'postalCodePrefix', 'price', 'condoFee', 'propertyTax', 'area',
+        'bedrooms', 'bathrooms', 'parkingSpaces', 'description', 'status',
+        'photos', 'phonePublished', 'whatsappAvailable',
+        'fullAddressPublished', 'publicAddress', 'latitude', 'longitude',
+        'createdAt', 'updatedAt'
+      ]);
+    }
+
+    function propertyPrivacyIsValid(data) {
+      return (!('phonePublished' in data.keys())
+          || data.phonePublished is bool)
+        && (!('fullAddressPublished' in data.keys())
+          || data.fullAddressPublished is bool)
+        && (!('whatsappAvailable' in data.keys())
+          || (data.whatsappAvailable is bool
+            && (!data.whatsappAvailable
+              || data.get('phonePublished', false) == true)))
+        && (!('publicAddress' in data.keys())
+          || (data.get('fullAddressPublished', false) == true
+            && data.publicAddress is string
+            && data.publicAddress.size() > 0))
+        && (data.get('fullAddressPublished', false) != true
+          || ('publicAddress' in data.keys()));
+    }
+
+    function validNewProperty(data) {
+      return data.keys().hasAll([
+          'ownerUid', 'title', 'dealType', 'category', 'neighborhood', 'city',
+          'state', 'price', 'description', 'status', 'photos',
+          'phonePublished', 'fullAddressPublished'
+        ])
+        && propertyFieldsAreAllowed(data)
+        && propertyPrivacyIsValid(data)
+        && data.ownerUid is string
+        && data.title is string
+        && data.title.size() > 0
+        && data.dealType in ['rent', 'buy']
+        && data.category in ['apartment', 'studio', 'house', 'gatedHouse']
+        && data.neighborhood is string
+        && data.city is string
+        && data.state is string
+        && data.price is number
+        && data.price > 0
+        && data.description is string
+        && data.description.size() <= 800
+        && data.photos is list
+        && data.photos.size() > 0
+        && data.photos.size() <= 10;
+    }
+
+    function privateDetailsFieldsAreAllowed(data) {
+      return data.keys().hasOnly([
+        'ownerUid', 'street', 'number', 'complement', 'postalCode',
+        'advertiserName'
+      ])
+        && data.ownerUid is string
+        && (!('street' in data.keys()) || data.street is string)
+        && (!('number' in data.keys()) || data.number is string)
+        && (!('complement' in data.keys()) || data.complement is string)
+        && (!('postalCode' in data.keys()) || data.postalCode is string)
+        && (!('advertiserName' in data.keys()) || data.advertiserName is string);
+    }
+
+    function contactFieldsAreAllowed(data) {
+      return data.keys().hasOnly(['ownerUid', 'phone'])
+        && data.ownerUid is string
+        && data.phone is string;
+    }
+
     match /properties/{propertyId} {
       allow get, list: if resource.data.status == 'active' || owns(resource.data);
 
       allow create: if signedIn()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.status == 'active'
-        && request.resource.data.title is string
-        && request.resource.data.title.size() > 0
-        && request.resource.data.price is number
-        && request.resource.data.price > 0;
+        && validNewProperty(request.resource.data);
 
       allow update: if owns(resource.data)
         && request.resource.data.ownerUid == resource.data.ownerUid
-        && request.resource.data.keys().hasOnly([
-          'ownerUid', 'title', 'dealType', 'category', 'neighborhood', 'city',
-          'state', 'postalCodePrefix', 'price', 'condoFee', 'propertyTax', 'area', 'bedrooms',
-          'bathrooms', 'parkingSpaces', 'description', 'status', 'photos',
-          'phonePublished', 'fullAddressPublished', 'publicAddress',
-          'latitude', 'longitude', 'createdAt', 'updatedAt'
-        ]);
+        && propertyFieldsAreAllowed(request.resource.data)
+        && propertyPrivacyIsValid(request.resource.data);
 
       allow delete: if owns(resource.data);
     }
@@ -43,12 +107,14 @@ service cloud.firestore {
 
       allow create: if signedIn()
         && request.resource.data.ownerUid == request.auth.uid
+        && privateDetailsFieldsAreAllowed(request.resource.data)
         && getAfter(/databases/$(database)/documents/properties/$(propertyId)).data.ownerUid
           == request.auth.uid;
 
       allow update: if signedIn()
         && resource.data.ownerUid == request.auth.uid
-        && request.resource.data.ownerUid == resource.data.ownerUid;
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && privateDetailsFieldsAreAllowed(request.resource.data);
 
       allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
@@ -67,12 +133,14 @@ service cloud.firestore {
 
       allow create: if signedIn()
         && request.resource.data.ownerUid == request.auth.uid
+        && contactFieldsAreAllowed(request.resource.data)
         && getAfter(/databases/$(database)/documents/properties/$(propertyId)).data.ownerUid
           == request.auth.uid;
 
       allow update: if signedIn()
         && resource.data.ownerUid == request.auth.uid
-        && request.resource.data.ownerUid == resource.data.ownerUid;
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && contactFieldsAreAllowed(request.resource.data);
 
       allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
