@@ -7,6 +7,8 @@ class DefaultFirebaseOptions {
   static const messagingSenderId =
       String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID');
   static const projectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
+  static const authDomain = String.fromEnvironment('FIREBASE_AUTH_DOMAIN');
+  static const storageBucket = String.fromEnvironment('FIREBASE_STORAGE_BUCKET');
   static const googleServerClientId =
       String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 
@@ -14,13 +16,14 @@ class DefaultFirebaseOptions {
       apiKey.isNotEmpty &&
       appId.isNotEmpty &&
       messagingSenderId.isNotEmpty &&
-      projectId.isNotEmpty &&
-      googleServerClientId.isNotEmpty;
+      projectId.isNotEmpty;
 
-  static FirebaseOptions get currentPlatform => const FirebaseOptions(
+  static FirebaseOptions get currentPlatform => FirebaseOptions(
         apiKey: apiKey,
         appId: appId,
         messagingSenderId: messagingSenderId,
         projectId: projectId,
+        authDomain: authDomain.isEmpty ? null : authDomain,
+        storageBucket: storageBucket.isEmpty ? null : storageBucket,
       );
 }
